@@ -11,6 +11,7 @@ import Foundation
 import NIO
 
 private let autofillEventGroup = MultiThreadedEventLoopGroup(numberOfThreads: 4)
+private let decimal = 1e6
 
 public class AutoFillSugar {
     /// Expire unconfirmed transactions after 20 ledger versions, approximately 1 minute, by default
@@ -143,14 +144,14 @@ public class AutoFillSugar {
         tx["Sequence"] = response!.result?.accountData.sequence as AnyObject
     }
 
-    func fetchAccountDeleteFee(_ client: XrplClient) async -> Double {
-        let request = ServerStateRequest()
-        let response = try! await client.request(request).wait() as? BaseResponse<ServerStateResponse>
-        let fee = response!.result?.state.validatedLedger?.reserveIncXrp
+    func fetchAccountDeleteFee(_ client: XrplClient) async throws  -> Double {
+        let request = try ServerInfoRequest(["command": "server_info"] as [String: AnyObject])
+        let response = try! await client.request(request).get() as? BaseResponse<ServerInfoResponse>
+        let fee = response!.result?.info.validatedLedger?.reserveIncXrp
         if fee == nil {
             //        return Promise.reject(XrplError("Could not fetch Owner Reserve."))
         }
-        return Double(fee!)
+        return Double(fee!) * decimal
     }
 
     func calculateFeePerTransactionType(
@@ -173,7 +174,7 @@ public class AutoFillSugar {
 
         // AccountDelete Transaction
         if tx["TransactionType"] as! String == "AccountDelete" {
-            baseFee = await fetchAccountDeleteFee(client)
+            baseFee = try await fetchAccountDeleteFee(client)
         }
 
         /*
