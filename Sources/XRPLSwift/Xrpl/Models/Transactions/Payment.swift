@@ -73,7 +73,7 @@ public class Payment: BaseTransaction, XrplTransaction {
      <http://xrpl.local/payment.html#creating-accounts>`_.
      */
 
-    public var amount: Amount
+    public var amount: Amount?
     /*
      The amount of currency to deliver. If the Partial Payment flag is set,
      deliver *up to* this amount instead. This field is required.
@@ -121,6 +121,8 @@ public class Payment: BaseTransaction, XrplTransaction {
      is considered a success.
      */
     
+    public var deliverMax: Amount?
+    
     public var date: Int?
     public var hash: String?
 
@@ -132,6 +134,7 @@ public class Payment: BaseTransaction, XrplTransaction {
         case paths = "Paths"
         case sendMax = "SendMax"
         case deliverMin = "DeliverMin"
+        case deliverMax = "DeliverMax"
         case date = "date"
         case hash = "hash"
     }
@@ -143,7 +146,8 @@ public class Payment: BaseTransaction, XrplTransaction {
         invoiceId: String? = nil,
         paths: [Path]? = nil,
         sendMax: Amount? = nil,
-        deliverMin: Amount? = nil
+        deliverMin: Amount? = nil,
+        deliverMax: Amount? = nil
     ) {
         self.amount = amount
         self.destination = destination
@@ -152,6 +156,7 @@ public class Payment: BaseTransaction, XrplTransaction {
         self.paths = paths
         self.sendMax = sendMax
         self.deliverMin = deliverMin
+        self.deliverMax = deliverMax
         super.init(account: "", transactionType: "Payment")
     }
 
@@ -166,9 +171,17 @@ public class Payment: BaseTransaction, XrplTransaction {
         self.paths = decoded.paths
         self.sendMax = decoded.sendMax
         self.deliverMin = decoded.deliverMin
+        self.deliverMax = decoded.deliverMax
         self.date = decoded.date
         self.hash = decoded.hash
         try super.init(json: json)
+        try validateAmount()
+    }
+    
+    func validateAmount() throws {
+        if self.amount == nil && self.deliverMax == nil {
+            throw Transaction.TransactionCodingError.decoding("Invalid Transaction Type")
+        }
     }
 
     public required init(from decoder: Decoder) throws {
@@ -180,9 +193,11 @@ public class Payment: BaseTransaction, XrplTransaction {
         paths = try values.decodeIfPresent([Path].self, forKey: .paths)
         sendMax = try values.decodeIfPresent(Amount.self, forKey: .sendMax)
         deliverMin = try values.decodeIfPresent(Amount.self, forKey: .deliverMin)
+        deliverMax = try values.decodeIfPresent(Amount.self, forKey: .deliverMax)
         date = try values.decodeIfPresent(Int.self, forKey: .date)
         hash = try values.decodeIfPresent(String.self, forKey: .hash)
         try super.init(from: decoder)
+        try validateAmount()
     }
 
     override public func encode(to encoder: Encoder) throws {
@@ -195,6 +210,7 @@ public class Payment: BaseTransaction, XrplTransaction {
         if let paths = paths { try values.encode(paths, forKey: .paths) }
         if let sendMax = sendMax { try values.encode(sendMax, forKey: .sendMax) }
         if let deliverMin = deliverMin { try values.encode(deliverMin, forKey: .deliverMin) }
+        if let deliverMax = deliverMax { try values.encode(deliverMax, forKey: .deliverMax) }
     }
 }
 
