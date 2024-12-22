@@ -61,7 +61,7 @@ public struct SignatureResult {
  ```swift
  // Derive a wallet from a bip39 Mnemonic
  const wallet = Wallet.fromMnemonic(
-   'jewel insect retreat jump claim horse second chef west gossip bone frown exotic embark laundry'
+ 'jewel insect retreat jump claim horse second chef west gossip bone frown exotic embark laundry'
  )
  console.log(wallet)
  // Wallet {
@@ -82,10 +82,10 @@ public struct SignatureResult {
  // }.
  *
  // Sign a JSON Transaction
-  const signed = seedWallet.signTransaction({
-      TransactionType: 'Payment',
-      Account: 'rG88FVLjvYiQaGftSa1cKuE2qNx7aK5ivo'
-      ...........
+ const signed = seedWallet.signTransaction({
+ TransactionType: 'Payment',
+ Account: 'rG88FVLjvYiQaGftSa1cKuE2qNx7aK5ivo'
+ ...........
  }).
  *
  console.log(signed)
@@ -105,7 +105,7 @@ public class Wallet {
     public let privateKey: String
     public let classicAddress: String
     public let seed: String?
-
+    
     /**
      Alias for wallet.classicAddress.
      - returns:
@@ -114,14 +114,14 @@ public class Wallet {
     public func address() -> String {
         return self.classicAddress
     }
-
+    
     /**
      Creates a new Wallet.
      - parameters:
-        - publicKey: The public key for the account.
-        - privateKey: The private key used for signing transactions for the account.
-        - address: Include if a Wallet uses a Regular Key Pair. It must be the master address of the account.
-        - seed: The seed used to derive the account keys.
+     - publicKey: The public key for the account.
+     - privateKey: The private key used for signing transactions for the account.
+     - address: Include if a Wallet uses a Regular Key Pair. It must be the master address of the account.
+     - seed: The seed used to derive the account keys.
      */
     public init(
         publicKey: String,
@@ -136,11 +136,11 @@ public class Wallet {
         : try! Keypairs.deriveAddress(publicKey)
         self.seed = seed
     }
-
+    
     /**
      Generates a new Wallet using a generated seed.
      - parameters:
-        - algorithm: The digital signature algorithm to generate an address for.
+     - algorithm: The digital signature algorithm to generate an address for.
      - returns:
      A new Wallet derived from a generated seed.
      */
@@ -148,13 +148,13 @@ public class Wallet {
         let seed: String = try! Keypairs.generateSeed(options: KeypairsOptions(algorithm: algorithm))
         return Wallet.fromSeed(seed)
     }
-
+    
     /**
      Derives a wallet from a seed.
      - parameters:
-        - seed: A string used to generate a keypair (publicKey/privateKey) to derive a wallet.
-        - algorithm: The digital signature algorithm to generate an address for.
-        - address: Include if a Wallet uses a Regular Key Pair. It must be the master address of the account.
+     - seed: A string used to generate a keypair (publicKey/privateKey) to derive a wallet.
+     - algorithm: The digital signature algorithm to generate an address for.
+     - address: Include if a Wallet uses a Regular Key Pair. It must be the master address of the account.
      - returns:
      A Wallet derived from a seed.
      */
@@ -164,13 +164,13 @@ public class Wallet {
     ) -> Wallet {
         return Wallet.deriveWallet(seed, address)
     }
-
+    
     /**
      Derives a wallet from an entropy (array of random numbers).
      - parameters:
-        - entropy: An array of random numbers to generate a seed used to derive a wallet.
-        - algorithm: The digital signature algorithm to generate an address for.
-        - address: Include if a Wallet uses a Regular Key Pair. It must be the master address of the account.
+     - entropy: An array of random numbers to generate a seed used to derive a wallet.
+     - algorithm: The digital signature algorithm to generate an address for.
+     - address: Include if a Wallet uses a Regular Key Pair. It must be the master address of the account.
      - returns:
      A Wallet derived from an entropy.
      */
@@ -182,15 +182,15 @@ public class Wallet {
         let seed = try! Keypairs.generateSeed(options: options)
         return Wallet.deriveWallet(seed, opts.address!)
     }
-
+    
     /**
      Derives a wallet from a bip39 or RFC1751 mnemonic (Defaults to bip39).
      - parameters:
-        - mnemonic: A string consisting of words (whitespace delimited) used to derive a wallet.
-        - address: Include if a Wallet uses a Regular Key Pair. It must be the master address of the account.
-        - derivationPath: The path to derive a keypair (publicKey/privateKey). Only used for bip39 conversions.
-        - mnemonicEncoding: If set to 'rfc1751', this interprets the mnemonic as a rippled RFC1751 mnemonic like `wallet_propose` generates in rippled. Otherwise the function defaults to bip39 decoding.
-        - algorithm: Only used if opts.mnemonicEncoding is 'rfc1751'. Allows the mnemonic to generate its secp256k1 seed, or its ed25519 seed. By default, it will generate the secp256k1 seed to match the rippled `wallet_propose` default algorithm.
+     - mnemonic: A string consisting of words (whitespace delimited) used to derive a wallet.
+     - address: Include if a Wallet uses a Regular Key Pair. It must be the master address of the account.
+     - derivationPath: The path to derive a keypair (publicKey/privateKey). Only used for bip39 conversions.
+     - mnemonicEncoding: If set to 'rfc1751', this interprets the mnemonic as a rippled RFC1751 mnemonic like `wallet_propose` generates in rippled. Otherwise the function defaults to bip39 decoding.
+     - algorithm: Only used if opts.mnemonicEncoding is 'rfc1751'. Allows the mnemonic to generate its secp256k1 seed, or its ed25519 seed. By default, it will generate the secp256k1 seed to match the rippled `wallet_propose` default algorithm.
      - returns:
      A Wallet derived from a mnemonic.
      - throws:
@@ -207,14 +207,14 @@ public class Wallet {
         //        if !validateMnemonic(mnemonic) {
         //            throw ValidationError("Unable to parse the given mnemonic using bip39 encoding")
         //        }
-
+        
         let seed = try Bip39Mnemonic.createSeed(mnemonic: mnemonic)
         let node = PrivateKey(seed: seed, coin: .bitcoin)
-
+        
         if node.publicKey.isEmpty {
             throw ValidationError("Unable to derive privateKey from mnemonic input")
         }
-
+        
         // BIP44 key derivation
         // m/44'
         let purpose = node.derived(at: .hardened(44))
@@ -226,11 +226,11 @@ public class Wallet {
         let change = account.derived(at: .notHardened(opts.derivationPath.change))
         // m/44'/144'/0'/0/0
         let firstPrivateKey = change.derived(at: .notHardened(opts.derivationPath.addressIndex))
-
+        
         var finalMasterPrivateKey = Data(repeating: 0x00, count: 33)
         finalMasterPrivateKey.replaceSubrange(1...firstPrivateKey.raw.count, with: firstPrivateKey.raw)
         let address = try Keypairs.deriveAddress(firstPrivateKey.publicKey.toHex)
-
+        
         let publicKey = firstPrivateKey.publicKey.toHex
         let privateKey = finalMasterPrivateKey.toHex
         // TODO: Shouldn't the mnemonic wallet append the address from `deriveAddress`
@@ -243,13 +243,13 @@ public class Wallet {
             seed: nil
         )
     }
-
+    
     /**
      Derives a wallet from a RFC1751 mnemonic, which is how `wallet_propose` encodes mnemonics.
      - parameters:
-        - mnemonic: A string consisting of words (whitespace delimited) used to derive a wallet.
-        - algorithm: The digital signature algorithm to generate an address for.
-        - address: Include if a Wallet uses a Regular Key Pair. It must be the master address of the account.
+     - mnemonic: A string consisting of words (whitespace delimited) used to derive a wallet.
+     - algorithm: The digital signature algorithm to generate an address for.
+     - address: Include if a Wallet uses a Regular Key Pair. It must be the master address of the account.
      - returns:
      A Wallet derived from a mnemonic.
      */
@@ -268,13 +268,13 @@ public class Wallet {
         )
         return Wallet.fromSeed(encodedSeed, opts.address!)
     }
-
+    
     /**
      Derive a Wallet from a seed.
      - parameters:
-        - seed: The seed used to derive the wallet.
-        - algorithm: The digital signature algorithm to generate an address for.
-        - address: Include if a Wallet uses a Regular Key Pair. It must be the master address of the account.
+     - seed: The seed used to derive the wallet.
+     - algorithm: The digital signature algorithm to generate an address for.
+     - address: Include if a Wallet uses a Regular Key Pair. It must be the master address of the account.
      - returns:
      A Wallet derived from the seed.
      */
@@ -290,13 +290,13 @@ public class Wallet {
             seed: seed
         )
     }
-
+    
     /**
      Signs a transaction offline.
      - parameters:
-        - transaction: A transaction to be signed offline.
-        - multisign: Specify true/false to use multisign or actual address (classic/x-address) to make multisign tx request.
-        - signingFor: The account the transaction is signingFor
+     - transaction: A transaction to be signed offline.
+     - multisign: Specify true/false to use multisign or actual address (classic/x-address) to make multisign tx request.
+     - signingFor: The account the transaction is signingFor
      - returns:
      A signed transaction.
      - throws:
@@ -312,7 +312,7 @@ public class Wallet {
         let tx = try transaction.toJson()
         return try self.sign(tx, multisign, signingFor)
     }
-
+    
     public func sign(
         //        transaction: Transaction,
         _ transaction: [String: AnyObject],
@@ -326,23 +326,23 @@ public class Wallet {
         } else if multisign {
             multisignAddress = self.classicAddress
         }
-
+        
         //        let tx = try! transaction.toJson()
         var tx = transaction
-
+        
         if tx["TxnSignature"] != nil || tx["Signers"] != nil {
             throw ValidationError("txJSON must not contain `TxnSignature` or `Signers` properties")
         }
-
+        
         removeTrailingZeros(&tx)
-
+        
         //        let encoder = JSONEncoder()
         //        let txData = try encoder.encode(transaction)
         //        var txToSignAndEncode = try JSONSerialization.jsonObject(with: tx, options: .mutableLeaves) as? [String: AnyObject]
         var txToSignAndEncode = tx
-
+        
         txToSignAndEncode["SigningPubKey"] = !multisignAddress.isEmpty ? "" as AnyObject : self.publicKey as AnyObject
-
+        
         if !multisignAddress.isEmpty {
             let signer = try Signer(json: [
                 "Account": multisignAddress,
@@ -362,14 +362,14 @@ public class Wallet {
             txToSignAndEncode["TxnSignature"] = signature as AnyObject
         }
         let serialized = try BinaryCodec.encode(txToSignAndEncode)
-        try self.checkTxSerialization(serialized, transaction)
+        try self.checkTxSerialization(serialized, tx)
         return SignatureResult(txBlob: serialized, hash: try HashLedger.hashSignedTx(serialized))
     }
-
+    
     /**
      Verifies a signed transaction offline.
      - parameters:
-        - signedTransaction: A signed transaction (hex string of signTransaction result) to be verified offline.
+     - signedTransaction: A signed transaction (hex string of signTransaction result) to be verified offline.
      - returns:
      Returns true if a signedTransaction is valid.
      */
@@ -383,26 +383,26 @@ public class Wallet {
             self.publicKey
         )
     }
-
+    
     /**
      Gets an X-address in Testnet/Mainnet format.
      - parameters:
-        - tag: A tag to be included within the X-address.
-        - isTestnet: A boolean to indicate if X-address should be in Testnet (true) or Mainnet (false) format.
+     - tag: A tag to be included within the X-address.
+     - isTestnet: A boolean to indicate if X-address should be in Testnet (true) or Mainnet (false) format.
      - returns:
      An X-address.
      */
     public func getXAddress(_ tag: Int? = nil, _ isTest: Bool = false) -> String {
         return try! AddressCodec.classicAddressToXAddress(classicAddress: self.classicAddress, tag: tag, isTest: isTest)
     }
-
+    
     /**
      Decode a serialized transaction, remove the fields that are added during the signing process,
      and verify that it matches the transaction prior to signing. This gives the user a sanity check
      to ensure that what they try to encode matches the message that will be recieved by rippled.
      - parameters:
-        - serialized: A signed and serialized transaction.
-        - tx: The transaction prior to signing.
+     - serialized: A signed and serialized transaction.
+     - tx: The transaction prior to signing.
      - throws:
      A ValidationError if the transaction does not have a TxnSignature/Signers property, or if the serialized Transaction desn't match the original transaction.
      - throws:
@@ -413,7 +413,7 @@ public class Wallet {
         var decoded: [String: AnyObject] = BinaryCodec.decode(serialized) as [String: AnyObject]
         //        var txCopy = try tx.toJson()
         var txCopy = tx
-
+        
         /**
          And ensure it is equal to the original tx, except:
          - It must have a TxnSignature or Signers (multisign).
@@ -425,18 +425,18 @@ public class Wallet {
         decoded["TxnSignature"] = nil
         // - We know that the original tx did not have Signers, so if it exists, we should delete it:
         decoded["Signers"] = nil
-
+        
         /*
          - If SigningPubKey was not in the original tx, then we should delete it.
-           But if it was in the original tx, then we should ensure that it has not been changed.
+         But if it was in the original tx, then we should ensure that it has not been changed.
          */
         if txCopy["SigningPubKey"] == nil {
             decoded["SigningPubKey"] = nil
         }
-
+        
         /*
          - Memos have exclusively hex data which should ignore case.
-           Since decode goes to upper case, we set all tx memos to be uppercase for the comparison.
+         Since decode goes to upper case, we set all tx memos to be uppercase for the comparison.
          */
         if let memos = txCopy["Memos"] as? [[String: AnyObject]] {
             txCopy["Memos"] = memos.map { memoclone -> [String: AnyObject] in
@@ -459,31 +459,40 @@ public class Wallet {
             }
             txCopy["URI"] = (txCopy["URI"] as! String).uppercased() as AnyObject
         }
-
+        
         try txCopy.forEach { (key: String, _: AnyObject) in
             let standardCurrencyCodeLen = 3
+            
             if txCopy[key] != nil && isIssuedCurrency(input: txCopy[key]!) {
-                let decodedAmount: Any = try xAmount.from(decoded[key] as! [String: String]).toJson()
-                var decodedIC = try IssuedCurrencyAmount(decodedAmount as! [String: AnyObject])
-                let decodedCurrency = decodedIC.currency
-                let txCurrency = try IssuedCurrencyAmount(txCopy[key] as! [String: AnyObject]).currency
-
-                if txCurrency.count == standardCurrencyCodeLen && txCurrency.uppercased() == "XRP" {
-                    throw ValidationError("Trying to sign an issued currency with a similar standard code to XRP (received \(txCurrency)'). XRP is not an issued currency.")
-                }
-
-                // Standardize the format of currency codes to the 40 byte hex string for comparison
-                let amount = try IssuedCurrencyAmount(txCopy[key] as! [String: AnyObject])
-                if amount.currency.count != decodedCurrency.count {
-                    if decodedCurrency.count == standardCurrencyCodeLen {
-                        decodedIC.currency = isoToHex(decodedCurrency)
-                    } else {
-                        //                        txCopy[key]!["currency"] = isoToHex(iso: amount.currency)
+                let mappedKey = key == "Amount" && decoded["DeliverMax"] != nil ? "DeliverMax" : key
+                
+                if let decodedValue = decoded[mappedKey] as? Dictionary<String, Any> {
+                    let amountDict = decodedValue.reduce(into: [String: String]()) { result, pair in
+                        result[pair.key] = String(describing: pair.value)
+                    }
+                    
+                    let decodedAmount: Any = try xAmount.from(amountDict).toJson()
+                    var decodedIC = try IssuedCurrencyAmount(decodedAmount as! [String: AnyObject])
+                    let decodedCurrency = decodedIC.currency
+                    let txCurrency = try IssuedCurrencyAmount(txCopy[key] as! [String: AnyObject]).currency
+                    
+                    if txCurrency.count == standardCurrencyCodeLen && txCurrency.uppercased() == "XRP" {
+                        throw ValidationError("Trying to sign an issued currency with a similar standard code to XRP (received \(txCurrency)'). XRP is not an issued currency.")
+                    }
+                    
+                    // Standardize the format of currency codes to the 40 byte hex string for comparison
+                    let amount = try IssuedCurrencyAmount(txCopy[key] as! [String: AnyObject])
+                    if amount.currency.count != decodedCurrency.count {
+                        if decodedCurrency.count == standardCurrencyCodeLen {
+                            decodedIC.currency = isoToHex(decodedCurrency)
+                        } else {
+                            //txCopy[key]!["currency"] = isoToHex(iso: amount.currency)
+                        }
                     }
                 }
             }
         }
-
+        
         if !(decoded == txCopy) {
             let data = [
                 "decoded": decoded,
@@ -501,9 +510,9 @@ public class Wallet {
 /**
  Signs a transaction with the proper signing encoding.
  - parameters:
-    - tx: A transaction to sign.
-    - privateKey: A key to sign the transaction with.
-    - signAs: Multisign only. An account address to include in the Signer field. Can be either a classic address or an XAddress.
+ - tx: A transaction to sign.
+ - privateKey: A key to sign the transaction with.
+ - signAs: Multisign only. An account address to include in the Signer field. Can be either a classic address or an XAddress.
  - returns:
  A signed transaction in the proper format.
  */
@@ -531,7 +540,7 @@ func computeSignature(
  with an amount that contains trailing insignificant zeros; for example, '123.4000' would serialize
  to '123.4' and cause a mismatch.
  - parameters:
-    - tx: The transaction prior to signing.
+ - tx: The transaction prior to signing.
  */
 func removeTrailingZeros(_ tx: inout [String: AnyObject]) {
     if let tt = tx["TransactionType"] as? String, tt == "Payment", let amountValue = tx["amount"] as? String, amountValue.contains(where: { $0 == "." }) {
@@ -543,7 +552,7 @@ func removeTrailingZeros(_ tx: inout [String: AnyObject]) {
 /**
  Convert an ISO code to a hex string representation
  - parameters:
-    - iso: A 3 letter standard currency code
+ - iso: A 3 letter standard currency code
  - returns:
  ISO Bytes
  */
